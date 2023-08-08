@@ -57,3 +57,38 @@ pbmc <- FindClusters(pbmc, resolution = 0.5)
 # Run UMAP
 pbmc <- RunUMAP(pbmc, dims = 1:10)
 DimPlot(pbmc, reduction = "umap")
+
+# Finding differentially expressed features (cluster biomarkers
+
+# Find markers for every cluster compared to all remaining cells, report only the positive ones
+pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+pbmc.markers %>%  group_by(cluster) %>%  slice_max(n = 2, order_by = avg_log2FC)
+
+# Feature marker genes
+FeaturePlot(pbmc, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP","CD8A")) # This is a single-line command.
+
+# Use canonical markers to easily match the unbiased clustering to known cell types
+
+new.cluster.ids <- c("Naive CD4 T", "CD14+ Mono", "Memory CD4 T", "B", "CD8 T", "FCGR3A+ Mono",                     "NK", "DC", "Platelet") 
+
+names(new.cluster.ids) <- levels(pbmc)
+pbmc <- RenameIdents(pbmc, new.cluster.ids)
+DimPlot(pbmc, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+
+#examine hetergeneous expression of the top 10 expressed genes in the dataset​
+
+DotPlot(pbmc, features = top10, cols = c("blue", "red"), dot.scale = 8) + RotatedAxis()
+
+# Find differentially expressed features between CD14+ Monocytes and all other cells, only
+
+# search for positive markers
+monocyte.de.markers <- FindMarkers(pbmc, ident.1 = "CD14+ Mono", ident.2 = NULL, only.pos = TRUE)
+
+# view results
+head(monocyte.de.markers)
+View(monocyte.de.markers)
+monocyte_genes <- rownames(monocyte.de.markers)
+
+#Extract gene names of top 20 differentially expressed CD14+ monocytes
+monocyte_top20 <- monocyte_genes[1:20]
+DotPlot(pbmc, features = monocyte_top20, cols = c("blue", "red"), dot.scale = 8) + RotatedAxis()
