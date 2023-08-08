@@ -1,5 +1,0 @@
-exp	cultivar	condition
-control_1	Colfx	untreated
-control_2	Colfx	untreated
-treatment_1	Colfx	treated
-treatment_2	Colfx	treated
